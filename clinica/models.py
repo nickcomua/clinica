@@ -1,3 +1,4 @@
+from unicodedata import name
 from django.db import models
 from django.contrib.auth.models import User
 from django.contrib.postgres.constraints import ExclusionConstraint
@@ -27,37 +28,46 @@ class Location(models.Model):
 
 
 class Client(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    user = models.OneToOneField(User, on_delete=models.CASCADE) 
 
 
 class DateRangeFunc(models.Func):
-    function = "daterange"
+    function = 'daterange'
     output_field = DateTimeRangeField()
+    arguments = [ models.DateTimeField(), models.DateTimeField() ]
+
+class TsTzRange(models.Func):
+    function = 'TSTZRANGE'
+    output_field = DateTimeRangeField()
+
+class AddTimeFunc(models.Func):
+    function = "DATEADD"
+    output_field = models.DateTimeField()
+    arguments = [models.DateTimeField(), models.DurationField()]
 
 
 class Appointement(models.Model):
+    class Meta:
+        ordering = ['datetime']
+        constraints = [
+            ExclusionConstraint(
+                name='exclude_overlapping_reservations', 
+                expressions=(
+                    ('datetime', RangeOperators.OVERLAPS),
+                    ('location', RangeOperators.EQUAL),
+                ), 
+            ),
+        ]
     worker = models.ForeignKey(Worker, on_delete=models.CASCADE)
     client = models.ForeignKey(Client, on_delete=models.CASCADE)
     location = models.ForeignKey(Location, on_delete=models.CASCADE)
     service = models.ForeignKey(Service, on_delete=models.CASCADE)
-    start_datetime = models.DateTimeField()
-    #@property
+    datetime = DateTimeRangeField() 
+    # @property
     # def end_datetime(self):
-    #    return self.start_datetime + self.service.models.DurationField(_("Duration")) 
-    class Meta:
-        ordering = ['start_datetime']
-        constraints = [
-            ExclusionConstraint(
-                name='appointement_datetime_exclusion',
-                expressions=[
-                    (
-                        DateRangeFunc(
-                            "start_datetime", "start_datetime"+"duration", RangeBoundary()
-                        ),
-                        RangeOperators.OVERLAPS,
-                    ),
-                    ('loaction', RangeOperators.EQUAL)
-                ]
-                # condition=models.Q(start_datetime__range=models.F('duration')),
-            ),
-        ]
+    #     return self.start_datetime + self.service.duration 
+
+    # def _get_end_datetime(self):
+    #     return self.start_datetime + self.service.models.DurationField(_("Duration"))
+    # end_datetime = property(_get_end_datetime)
+

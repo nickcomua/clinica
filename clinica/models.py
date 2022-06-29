@@ -1,6 +1,4 @@
-import datetime
-from statistics import median
-from unicodedata import name
+import datetime 
 from django.db import models
 from django.contrib.auth.models import User
 from django.contrib.postgres.constraints import ExclusionConstraint

@@ -13,9 +13,7 @@ class AppointmentPer(permissions.BasePermission):
         print(request.user.id)
         print(request.data)
         try:
-            if (Client.objects.get(user_id=request.user.id).id == request.data['client']):
-                return True
-            if (Worker.objects.get(user_id=request.user.id).id == request.data['worker']):
+            if ((Client.objects.get(user_id=request.user.id).id == request.data['client']) | (Worker.objects.get(user_id=request.user.id).id == request.data['worker'])):
                 return True
         except:
             None
@@ -23,6 +21,7 @@ class AppointmentPer(permissions.BasePermission):
         if (request.user.is_superuser):
             return True 
         return False
+        
     def has_object_permission(self, request, view, obj):
         if (request.user.is_superuser):
             return True 

@@ -1,11 +1,6 @@
-from email.policy import default
-from django.http import QueryDict
 from rest_framework import serializers
-from clinica.models import * 
-from datetime import datetime
-from django.contrib.auth.models import User
-from .permition import AppointmentPer
-
+from clinica.models import *  
+from django.contrib.auth.models import User 
 class UserSerializer(serializers.ModelSerializer):
     #snippets = serializers.PrimaryKeyRelatedField(many=True, queryset=Snippet.objects.all())
     class Meta:

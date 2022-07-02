@@ -1,5 +1,5 @@
 
-from django.http import HttpResponse 
+from django.http import HttpResponse, QueryDict 
 from clinica.serializers import *
 from clinica.models import *
 from rest_framework import generics
@@ -89,6 +89,8 @@ class AppointementList(generics.ListCreateAPIView):
     def create(self, request, *args, **kwargs):
         if(not Worker.objects.get(id=request.data['worker']).services.filter(id=request.data['service']).exists()):
             return HttpResponse(status=400, content="Service for this worker not available")
+        if(not Worker.objects.get(id=request.data['worker']).locations.filter(id=request.data['location']).exists()):
+            return HttpResponse(status=400, content="Location for this worker not available")
         try:
             s = datetime.strptime(
                 request.data['start_datetime'], '%Y-%m-%dT%H:%M:%S')
@@ -118,6 +120,8 @@ class AppointementDetail(generics.RetrieveUpdateDestroyAPIView):
     def update(self, request, *args, **kwargs):
         if(not Worker.objects.get(id=request.data['worker']).services.filter(id=request.data['service']).exists()):
             return HttpResponse(status=400, content="Service for this worker not available")
+        if(not Worker.objects.get(id=request.data['worker']).locations.filter(id=request.data['location']).exists()):
+            return HttpResponse(status=400, content="Location for this worker not available")
         try:
             s = datetime.strptime(
                 request.data['start_datetime'], '%Y-%m-%dT%H:%M:%S')

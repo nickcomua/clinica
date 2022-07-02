@@ -21,25 +21,21 @@ class Service(models.Model):
             models.CheckConstraint(check=models.Q(duration__gt=datetime.timedelta(0)) & models.Q(
                 duration__lte=datetime.timedelta(hours=24)), name='duration_positive'),
         ]
-
-
-class Worker(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-    services = models.ManyToManyField(Service)
-
-    def __str__(self):
-        return self.user.username
-
-    class Meta:
-        ordering = ['user']
-
-
 class Location(models.Model):
     address = models.TextField(unique=True)
 
     def __str__(self):
         return self.address
 
+class Worker(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    services = models.ManyToManyField(Service)
+    locations = models.ManyToManyField(Location)
+    def __str__(self):
+        return self.user.username
+
+    class Meta:
+        ordering = ['user']
 
 class Client(models.Model):
     def __str__(self):
